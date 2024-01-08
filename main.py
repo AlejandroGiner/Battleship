@@ -8,6 +8,7 @@ def cls():
 
 
 def get_option_from_list(options: dict):
+    """Repeatedly gets standard input until the input is a valid option in the dict keys, then returns it."""
     while True:
         for i,v in options.items():
             print(f'{i}. {v[0]}')
