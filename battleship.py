@@ -1,8 +1,8 @@
-class BattleshipGame():
+class Game():
     def __init__(self, max_turns: int, size: int = 10):
         self.max_turns = max_turns
         self.size = size
-        self.current_turn = 0
+        self.current_turn = 1
         self.game_over = False
         #self.board = [['.' for i in range(size)] for i in range(size)]
         self.discovered = [[False for i in range(size)] for i in range(size)]
@@ -56,10 +56,39 @@ class BattleshipGame():
         for n, row in enumerate(board):
             for i in row:
                 # Add background colors and padding
-                board_str += f'{esc}{colors.get(i)}{i: ^4}{esc}[0m'
+                if i in colors.keys():
+                    board_str += f'{esc}{colors.get(i)}'
+                board_str += f'{i: ^4}{esc}[0m'
+            # Add row labels
             board_str += f'{self.rows[n-1] if n>0 else "": ^3}\n'
         return board_str
 
-    def comprueba(self, row, col):
+    def hit(self, row, col):
+        """Plays a turn in the game, raising an exception if the maximum number of turns have already been played, or if the cell has already been played.
+            Returns the number of remaining sections for the ship that is hit, or -1 if no ship is hit.
+        """
+        if self.current_turn > self.max_turns:
+            raise GameOverError('This game has reached the maximum number of turns.')
+
+        # Map coordinates so that they work on the board
         row = self.rows.find(row)
         col -= 1
+
+        if self.discovered[row][col]:
+            raise AlreadyDiscoveredError('This cell has already been hit.')
+
+        cell = self.board[row][col]
+
+        self.discovered[row][col] = True
+
+        if cell == '~':
+            return -1
+
+        self.ships[cell] -= 1
+        return self.ships[cell]
+
+
+class AlreadyDiscoveredError(Exception):
+    pass
+class GameOverError(Exception):
+    pass

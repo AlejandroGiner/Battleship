@@ -1,4 +1,4 @@
-import game
+import battleship
 import pickle
 import os
 import re
@@ -28,7 +28,7 @@ def turno(jugada):
         row, col = jugada_regex.group(1,2)
         return f'Elegida casilla {row}{col}'
 
-def ejecutar_partida(current_game: game.BattleshipGame):
+def ejecutar_partida(current_game: battleship.Game):
     resultado_turno = ''
     while True:
         cls()
@@ -50,7 +50,7 @@ def nueva_partida():
     print('Elige una dificultad:')
     choice = get_option_from_list(difficulties)
     chosen_difficulty = difficulties[choice][1]
-    new_game = game.BattleshipGame(chosen_difficulty)
+    new_game = battleship.Game(chosen_difficulty)
     ejecutar_partida(new_game)
 
 
