@@ -1,46 +1,27 @@
-import battleship
+import battleship, utils
 import pickle
-import os
 import re
 
-def cls():
-    os.system('cls' if os.name=='nt' else 'clear')
-
-
-def get_option_from_list(options: dict):
-    """Repeatedly gets standard input until the input is a valid option in the dict keys, then returns it."""
-    while True:
-        for i,v in options.items():
-            print(f'{i}. {v[0]}')
-        eleccion = input()
-        if eleccion in options.keys():
-            return eleccion
-        print('Opción inválida. Por favor elige una opción de la lista.')
-
-def guardar():
-    pass
-
-def turno(jugada):
+def turno(jugada, game: battleship.Game):
     if jugada == 'G':
-        guardar()
+        utils.guardar_partida(game)
         return 'Partida guardada.'
     elif jugada_regex := re.fullmatch(r'([A-J])([0-9]+)',jugada):
         row, col = jugada_regex.group(1,2)
+        game.hit(row, col)
         return f'Elegida casilla {row}{col}'
 
 def ejecutar_partida(current_game: battleship.Game):
     resultado_turno = ''
     while True:
-        cls()
+        utils.cls()
         print(current_game.get_board())
         print(f'Turno {current_game.current_turn} de {current_game.max_turns}')
         print(resultado_turno)
         print('Introduce una coordenada para intentar destruir un barco (por ejemplo: B3)')
         print('O introduce \'G\' para guardar la partida.')
         jugada = input()
-        resultado_turno = turno(jugada)
-
-
+        resultado_turno = turno(jugada, current_game)
 
 def nueva_partida():
     difficulties = {
@@ -48,20 +29,17 @@ def nueva_partida():
         '2': ('Difícil', 35)
     }
     print('Elige una dificultad:')
-    choice = get_option_from_list(difficulties)
+    choice = utils.get_option_from_list(difficulties)
     chosen_difficulty = difficulties[choice][1]
     new_game = battleship.Game(chosen_difficulty)
     ejecutar_partida(new_game)
 
-
-def cargar_partida():
-    try:
-        with open('battleship.pickle','rb') as f:
-            loaded_game = pickle.load(f)
-    except:
-        print('No se ha podido cargar la partida.')
-        return
-    ejecutar_partida(loaded_game)
+def continuar_partida():
+    loaded_game = utils.cargar_partida()
+    if loaded_game:
+        ejecutar_partida(loaded_game)
+    else:
+        print('Error al cargar la partida.')
 
 opciones = {
     '1':('Nueva partida',nueva_partida),
@@ -69,16 +47,13 @@ opciones = {
 }
 
 def hay_partida_anterior():
-    try:
-        with open('battleship.pickle','rb') as f:
-            return pickle.load(f)
-    except:
-        return False
+    return utils.cargar_partida() is not None
 
 def menu():
     while True:
+        # If a saved game is detected, show the menu option to load it
         if hay_partida_anterior():
-            opciones['2'] = ('Cargar partida',cargar_partida)
+            opciones['2'] = ('Cargar partida',continuar_partida)
         elif opciones.get('2'):
             opciones.pop('2')
         for i,v in opciones.items():

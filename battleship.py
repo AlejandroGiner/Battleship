@@ -4,7 +4,6 @@ class Game():
         self.size = size
         self.current_turn = 1
         self.game_over = False
-        #self.board = [['.' for i in range(size)] for i in range(size)]
         self.discovered = [[False for i in range(size)] for i in range(size)]
 
         # Shows how many sections are still standing for each ship
@@ -63,23 +62,33 @@ class Game():
             board_str += f'{self.rows[n-1] if n>0 else "": ^3}\n'
         return board_str
 
-    def hit(self, row, col):
-        """Plays a turn in the game, raising an exception if the maximum number of turns have already been played, or if the cell has already been played.
-            Returns the number of remaining sections for the ship that is hit, or -1 if no ship is hit.
+    def hit(self, row: str, col: str):
+        """Plays a turn in the game.
+
+            :param row: The row of the cell to be hit. 
+            :param col: The column of the cell to be hit.
+            :returns: The number of remaining sections for the ship that is hit, or -1 if no ship is hit.
+            :raises GameOverError: The game has ended because the maximum amount of turns has been reached.
+            :raises AlreadyDiscoveredError: The cell being tried has already been hit.
         """
         if self.current_turn > self.max_turns:
             raise GameOverError('This game has reached the maximum number of turns.')
 
-        # Map coordinates so that they work on the board
-        row = self.rows.find(row)
-        col -= 1
 
-        if self.discovered[row][col]:
+        # Map coordinates so that they work on the board
+        raw_row = self.rows.find(row)
+        raw_col = int(col) - 1
+
+        if self.discovered[raw_row][raw_col]:
             raise AlreadyDiscoveredError('This cell has already been hit.')
 
-        cell = self.board[row][col]
+        # TODO: out of bounds error
 
-        self.discovered[row][col] = True
+        self.current_turn += 1
+
+        cell = self.board[raw_row][raw_col]
+
+        self.discovered[raw_row][raw_col] = True
 
         if cell == '~':
             return -1
