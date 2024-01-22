@@ -37,7 +37,11 @@ def ejecutar_partida(current_game: battleship.Game):
         print(f'Turno {current_game.current_turn} de {current_game.max_turns}')
         print(f'Barcos hundidos: {current_game.sunk_boats()}')
         print(resultado_turno)
-        if current_game.current_turn <= current_game.max_turns:
+
+        if current_game.won():
+            print('¡Has ganado!')
+            break
+        elif current_game.current_turn <= current_game.max_turns:
             print('Introduce una coordenada para intentar destruir un barco (por ejemplo: B3)')
             print('O introduce \'G\' para guardar la partida.')
             jugada = input()

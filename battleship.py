@@ -38,6 +38,8 @@ class Game():
         default_board.append('~~BBBB~~~~')
         self.board = default_board
 
+    def won(self):
+        return all(ship==0 for ship in self.ships.values())
     
     def get_board(self):
         """Returns the string representation of the game board, showing each cell as unexplored, water, or a ship type."""
