@@ -14,6 +14,15 @@ class Game():
             'B':4,
             'P':5
         }
+
+        self.ship_names = {
+            'L':'Lancha',
+            'C':'Crucero',
+            'S':'Submarino',
+            'B':'Buque',
+            'P':'Portaaviones'
+        }
+
         self.rows = 'ABCDEFGHIJ'
 
         default_board = []
@@ -57,10 +66,19 @@ class Game():
                 # Add background colors and padding
                 if i in colors.keys():
                     board_str += f'{esc}{colors.get(i)}'
-                board_str += f'{i: ^4}{esc}[0m'
+                board_str += f'{i if i in "?~" else "X": ^4}{esc}[0m'
             # Add row labels
             board_str += f'{self.rows[n-1] if n>0 else "": ^3}\n'
         return board_str
+
+    def sunk_boats(self):
+        sunk_boats = ''
+        for ship, remaining in self.ships.items():
+            if remaining == 0:
+                sunk_boats += f'{self.ship_names[ship]} '
+        return sunk_boats
+
+
 
     def hit(self, row: str, col: str):
         """Plays a turn in the game.
@@ -74,15 +92,17 @@ class Game():
         if self.current_turn > self.max_turns:
             raise GameOverError('This game has reached the maximum number of turns.')
 
-
         # Map coordinates so that they work on the board
         raw_row = self.rows.find(row)
+        if raw_row == -1:
+            raise IndexError
         raw_col = int(col) - 1
+
+        # TODO: out of bounds error
 
         if self.discovered[raw_row][raw_col]:
             raise AlreadyDiscoveredError('This cell has already been hit.')
 
-        # TODO: out of bounds error
 
         self.current_turn += 1
 

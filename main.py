@@ -8,8 +8,26 @@ def turno(jugada, game: battleship.Game):
         return 'Partida guardada.'
     elif jugada_regex := re.fullmatch(r'([A-J])([0-9]+)',jugada):
         row, col = jugada_regex.group(1,2)
-        game.hit(row, col)
-        return f'Elegida casilla {row}{col}'
+        try:
+            result = game.hit(row, col)
+        except battleship.AlreadyDiscoveredError:
+            return 'Ya has elegido esta casilla anteriormente.'
+        except battleship.GameOverError:
+            return 'La partida ha terminado.'
+        except IndexError:
+            return 'Esa casilla no existe.'
+
+
+        ret = f'Elegida casilla {row}{col}. '
+        if result > 0:
+            ret += '¡Tocado!'
+        elif result == 0:
+            ret += '¡Tocado y hundido!'
+        else:
+            ret += 'No has tocado...'
+
+        return ret
+
 
 def ejecutar_partida(current_game: battleship.Game):
     resultado_turno = ''
@@ -17,11 +35,16 @@ def ejecutar_partida(current_game: battleship.Game):
         utils.cls()
         print(current_game.get_board())
         print(f'Turno {current_game.current_turn} de {current_game.max_turns}')
+        print(f'Barcos hundidos: {current_game.sunk_boats()}')
         print(resultado_turno)
-        print('Introduce una coordenada para intentar destruir un barco (por ejemplo: B3)')
-        print('O introduce \'G\' para guardar la partida.')
-        jugada = input()
-        resultado_turno = turno(jugada, current_game)
+        if current_game.current_turn <= current_game.max_turns:
+            print('Introduce una coordenada para intentar destruir un barco (por ejemplo: B3)')
+            print('O introduce \'G\' para guardar la partida.')
+            jugada = input()
+            resultado_turno = turno(jugada, current_game)
+        else:
+            print('Número máximo de turnos alcanzado. Has perdido.')
+            break
 
 def nueva_partida():
     difficulties = {
